@@ -1,0 +1,18 @@
+# Secrets
+.env
+firebase_admin_key.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+.venv/
+
+# OS/editor
+.vscode/
+.DS_Store
+Thumbs.db
