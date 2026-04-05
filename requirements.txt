@@ -1,9 +1,10 @@
 fastapi
-uvicorn
-python-multipart
-face_recognition
+uvicorn[standard]
+python-dotenv
+supabase
+requests
+firebase-admin
+face-recognition
 opencv-python
 numpy
-supabase
-python-dotenv
-Pillow
+python-multipart
