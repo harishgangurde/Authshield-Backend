@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
 import uuid
+import json
 
 import firebase_admin
 from firebase_admin import credentials, messaging
@@ -23,7 +24,15 @@ from supabase_service import (
 
 # ================= FIREBASE INIT =================
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_admin_key.json")
+    firebase_json = os.getenv("FIREBASE_ADMIN_JSON")
+
+    if firebase_json:
+        print("🔥 Using FIREBASE_ADMIN_JSON from environment")
+        cred = credentials.Certificate(json.loads(firebase_json))
+    else:
+        print("📁 Using local firebase_admin_key.json")
+        cred = credentials.Certificate("firebase_admin_key.json")
+
     firebase_admin.initialize_app(cred)
 
 # ================= FASTAPI APP =================
@@ -74,6 +83,11 @@ def send_push_notification(title: str, body: str):
 @app.get("/")
 def home():
     return {"message": "AuthShield Face Backend Running"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "AuthShield Backend"}
 
 
 # 🔐 Fetch latest keypad password for ESP32
@@ -305,3 +319,8 @@ async def wrong_password_image(file: UploadFile = File(...)):
     finally:
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
