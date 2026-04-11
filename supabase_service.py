@@ -96,7 +96,7 @@ def upload_image_to_storage(file_path: str, file_name: str):
         raise e
 
 
-# 🔥 Fetch latest saved device token from Supabase
+# Fetch latest saved device token from Supabase
 def get_latest_device_token():
     try:
         print("📲 Fetching latest FCM device token from Supabase...")

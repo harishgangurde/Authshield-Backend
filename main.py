@@ -90,7 +90,7 @@ def health():
     return {"status": "ok", "service": "AuthShield Backend"}
 
 
-# 🔐 Fetch latest keypad password for ESP32
+# Fetch latest keypad password for ESP32
 @app.get("/device-password")
 def device_password():
     try:
