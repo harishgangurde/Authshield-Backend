@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from supabase_service import update_keypad_password
 import shutil
 import os
 import uuid
@@ -61,16 +62,23 @@ def send_push_notification(title: str, body: str):
         print("📲 Sending push to latest saved device token...")
 
         message = messaging.Message(
-            token=token,
-            data={
-                "title": title,
-                "body": body,
-                "type": "intrusion"
-            },
-            android=messaging.AndroidConfig(
-                priority="high",
-            ),
-        )
+        token=token,
+
+        # ✅ THIS MAKES NOTIFICATION VISIBLE
+        notification=messaging.Notification(
+            title=title,
+            body=body,
+        ),
+
+        # (optional, keep data if needed)
+        data={
+            "type": "intrusion"
+        },
+
+        android=messaging.AndroidConfig(
+            priority="high",
+        ),
+    )
 
         response = messaging.send(message)
         print("🔥 Push notification sent:", response)
@@ -91,6 +99,7 @@ def health():
 
 
 # Fetch latest keypad password for ESP32
+# Fetch latest keypad password for ESP32
 @app.get("/device-password")
 def device_password():
     try:
@@ -102,10 +111,43 @@ def device_password():
         }
 
     except Exception as e:
-        print("❌ DEVICE PASSWORD ROUTE ERROR:", str(e))
         return {
             "success": False,
             "password": "1234",
+            "message": str(e)
+        }
+
+
+# ✅ 👉 ADD THIS HERE (RIGHT BELOW)
+from fastapi import Body
+
+@app.post("/device-password")
+def update_device_password(data: dict = Body(...)):
+    try:
+        password = data.get("password")
+
+        if not password:
+            return {
+                "success": False,
+                "message": "Password not provided"
+            }
+
+        from supabase_service import update_keypad_password
+        result = update_keypad_password(password)
+
+        if result:
+            return {
+                "success": True   # ✅ IMPORTANT
+            }
+        else:
+            return {
+                "success": False
+            }
+
+    except Exception as e:
+        print("❌ ERROR:", str(e))
+        return {
+            "success": False,
             "message": str(e)
         }
 

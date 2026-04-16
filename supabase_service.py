@@ -143,20 +143,44 @@ def get_keypad_password():
             row = data[0]
 
             password = (
-                row.get("setting_value")
+                row.get("value")
                 or row.get("password")
-                or row.get("data")
-                or row.get("config_value")
-                or row.get("keypad_password")
                 or "1234"
             )
 
             print("✅ Keypad password fetched:", password)
             return str(password)
 
-        print("⚠ No keypad password found, using default 1234")
         return "1234"
 
     except Exception as e:
         print("❌ KEYPAD PASSWORD FETCH ERROR:", str(e))
         return "1234"
+
+
+# ✅ 👉 ADD THIS FUNCTION HERE (BOTTOM OF FILE)
+def update_keypad_password(new_password: str):
+    try:
+        print("🔐 Updating keypad password in Supabase...")
+
+        response = (
+            supabase.table("settings")
+            .update({"value": new_password})
+            .eq("key", "keypad_password")
+            .execute()
+        )
+
+        if not response.data:
+            print("⚠ No existing row, inserting new one...")
+
+            supabase.table("settings").insert({
+                "key": "keypad_password",
+                "value": new_password   # ✅ FIXED
+            }).execute()
+
+        print("✅ Password updated successfully")
+        return True
+
+    except Exception as e:
+        print("❌ PASSWORD UPDATE ERROR:", str(e))
+        return False
